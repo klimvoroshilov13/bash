@@ -2,7 +2,7 @@
 
 # Variables
 IP="192.168.1.112"
-USER="admin"
+USER="Admin"
 PASS="admin"
 
 # Commands
