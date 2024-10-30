@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Server WireGuard
-server_ip="127.0.0.1"
-server_port="51820"
+server_ip="ip_address"
+server_port="port"
 
 # Function to calculate the port based on current date and time
 calculate_port() {
