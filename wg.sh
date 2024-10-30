@@ -6,11 +6,10 @@ server_port="51820"
 
 # Function to calculate the port based on current date and time
 calculate_port() {
-    local day hour minute
-    day=$(date +%d)
-    hour=$(date +%H)
-    minute=$(date +%M)
-    echo $((45001 + day * hour + minute))
+    _calculate_port_day=$(date +%d)
+    _calculate_port_hour=$(date +%H)
+    _calculate_port_minute=$(date +%M)
+    echo $((45001 + _calculate_port_day * _calculate_port_hour + _calculate_port_minute))
 }
 
 get_last_handshake_number() {
@@ -29,12 +28,12 @@ get_last_handshake_number() {
 last_handshake=$(get_last_handshake_number)
 
 # Check if the last handshake number is greater than 0
-if [[ "$last_handshake" -gt 125 && "$last_handshake" -lt 300 ]]; then
+if [ "$last_handshake" -gt 125 ] && [ "$last_handshake" -lt 300 ]; then
     # Calculate the port
     port=$(calculate_port)
 
     # Run nping with the calculated source port
-    nping --udp --count 10 --data-length 16 --source-port $port --dest-port $server_port $server_ip > /dev/null 2>&1
+    nping --udp --count 10 --data-length 16 --source-port "$port" --dest-port $server_port $server_ip > /dev/null 2>&1
 
     # Run ndmc to set the Wireguard listen port
     ndmc -c "interface Wireguard0 wireguard listen-port $port" > /dev/null 2>&1
