@@ -12,23 +12,24 @@ calculate_port() {
     echo $((45001 + _calculate_port_day * _calculate_port_hour + _calculate_port_minute))
 }
 
-get_last_handshake_number() {
-    # Capture the output of the 'ndmc' command and extract the last-handshake information
-    output=$(ndmc -c "show interface Wireguard0" | grep "last-handshake")
+get_last_handshake_time() {
+    
+    # Capture the time of the 'ndmc' command and extract the last-handshake time
+    time=$(ndmc -c "show interface Wireguard0" | grep "last-handshake" | grep -o '[0-9]\+')
 
-    # Extract the number from the output using grep
-    number=$(echo "$output" | grep -o '[0-9]\+')
-
-    # Return the number
-    echo "$number"
+    # Return the time
+    echo "$time"
 }
 
+# Get last handshake time
+last_handshake=$(get_last_handshake_time)
 
-# Get last handshake number
-last_handshake=$(get_last_handshake_number)
-
-# Check if the last handshake number is greater than 0
+# Check if the last handshake number is greater than 125
 if [ "$last_handshake" -gt 125 ] && [ "$last_handshake" -lt 300 ]; then
+    
+    # Get interface Wireguard0
+    interface=$(ndmc -c "show interface Wireguard0")
+    
     # Calculate the port
     port=$(calculate_port)
 
@@ -39,6 +40,7 @@ if [ "$last_handshake" -gt 125 ] && [ "$last_handshake" -lt 300 ]; then
     ndmc -c "interface Wireguard0 wireguard listen-port $port" > /dev/null 2>&1
 
     # Log
+    echo "$(date +"%Y-%m-%d %H:%M:%S") $interface" >> /opt/var/log/wg-interface.log
     echo "$(date +"%Y-%m-%d %H:%M:%S") Last handshake: $last_handshake New port: $port" >> /opt/var/log/wg.log
 else
     # Exit the script if the interface does not exist
