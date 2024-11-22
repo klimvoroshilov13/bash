@@ -5,12 +5,22 @@ server_ip="ip_address"
 server_port="port"
 
 # Function to calculate the port based on current date and time
-calculate_port() {
-    _calculate_port_day=$(date +%d)
-    _calculate_port_hour=$(date +%H)
-    _calculate_port_minute=$(date +%M)
-    echo $((45001 + _calculate_port_day * _calculate_port_hour + _calculate_port_minute))
+calculate_port() { 
+    _calculate_port_day=$(date +%d 2>/dev/null || echo 1)      # Day of the month
+    _calculate_port_hour=$(date +%H 2>/dev/null || echo 0)     # Current hour
+    _calculate_port_minute=$(date +%M 2>/dev/null || echo 0)   # Current minute
+
+    # Perform calculation
+    port=$((45001 + _calculate_port_day * _calculate_port_hour + _calculate_port_minute))
+
+    # Ensure the port is within valid range
+    if [ $port -gt 65535 ]; then
+        port=65535
+    fi
+
+    echo $port
 }
+
 
 get_last_handshake_time() {
     
@@ -25,7 +35,7 @@ get_last_handshake_time() {
 last_handshake=$(get_last_handshake_time)
 
 # Check if the last handshake number is greater than 125
-if [ "$last_handshake" -gt 125 ] && [ "$last_handshake" -lt 300 ]; then
+if [ "$last_handshake" -gt 126 ] && [ "$last_handshake" -lt 300 ]; then
     
     # Get interface Wireguard0
     interface=$(ndmc -c "show interface Wireguard0")
